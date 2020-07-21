@@ -57,7 +57,6 @@ color_themes = {
 active_color_theme = tk.StringVar()
 active_color_theme.set(value="Default Light")
 
-
 main_menu.add_cascade(label="File", menu=file)
 main_menu.add_cascade(label="Edit", menu=edit)
 main_menu.add_cascade(label="View", menu=view)
@@ -116,33 +115,68 @@ center_align_btn = ttk.Button(tool_bar, image=center_align_img)
 center_align_btn.grid(row=0, column=8, padx=2)
 
 # text editor
-line_number = tk.Label()
-line_number.pack(side=tk.RIGHT, fill=tk.Y)
-
-text_editor = tk.Text()
+# line_number = tk.Text(root, width=2)
+# line_number.config()
+# line_number.pack(side=tk.LEFT, fill=tk.Y)
+# line_number.insert(1.0, '1 ')
+# line_number.insert(1.0, 'pavan')
+# line_number.config(state='disable')
+text_editor = tk.Text(root)
 text_editor.config(wrap='word', relief='flat')
-scroll_bar = tk.Scrollbar()
+scroll_bar = tk.Scrollbar(root, orient=tk.VERTICAL)
+
+# def scrollable(event=None, *args):
+#     print(event)
+#     try:
+#         if event.delta:
+#             line_number.yview_scroll(int(-1 * (event.delta / 120)), "units")
+#             text_editor.yview_scroll(int(-1 * (event.delta / 120)), "units")
+#     except Exception:
+#         pass
+#     line_number.yview(*args)
+#     text_editor.yview(*args)
+
+
 scroll_bar.config(command=text_editor.yview)
 text_editor.focus_set()
 scroll_bar.pack(side=tk.RIGHT, fill=tk.Y)
-text_editor.config(yscrollcommand=scroll_bar.set)
-text_editor.pack(fill=tk.BOTH, expand=True)
-
-status_bar = ttk.Label(text_editor, text="Status bar")
+status_bar = ttk.Label(root, text="Status bar")
 
 status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+text_editor.configure(yscrollcommand=scroll_bar.set)
+# line_number.config(yscrollcommand=scroll_bar.set)
+text_editor.pack(fill=tk.BOTH, expand=True)
+# text_editor.bind('<MouseWheel>', text_editor.yview)
+
 
 text_changed = False
+no_of_lines = 1
 
 
 def text_changes_occured(event=None):
     global text_changed
+    global no_of_lines
     if text_editor.edit_modified():
+        number_of_lines = text_editor.get(1.0, 'end-1c').count('\n')
         text_changed = False
         no_of_characters = len(text_editor.get(1.0, 'end-1c'))
         no_of_words = len(text_editor.get(1.0, 'end-1c').split())
+        increased_lines = text_editor.get(1.0, 'end-1c').count('\n') + 1
+        print(no_of_lines, increased_lines)
+        # if no_of_lines - increased_lines != 0:
+        # line_number.config(state='normal')
+        # line_number.delete(1.0, tk.END)
+        # for line_num in range(increased_lines):
+        #     x = len(str(line_num))
+        # line_number.config(width=x)
+        # line_number.config(state='normal')
+        # if line_num == 0:
+        #     line_number.insert(tk.END, f'{line_num + 1}')
+        # else:
+        #     line_number.insert(tk.END, f'\n{line_num + 1}')
+        # line_number.config(state='disable')
+        # no_of_lines = increased_lines
         status_bar.config(text=f'words: {no_of_words}, characters: {no_of_characters}')
-        print(no_of_words, no_of_characters)
     text_editor.edit_modified(False)
 
 
@@ -159,12 +193,14 @@ def font_change(event=None):
     global current_font_family
     current_font_family = font_selected_type.get()
     text_editor.configure(font=(current_font_family, current_font_size))
+    # line_number.configure(font=(current_font_family, current_font_size))
 
 
 def font_size_change(event=None):
     global current_font_size
     current_font_size = selected_font_size.get()
     text_editor.configure(font=(current_font_family, current_font_size))
+    # line_number.configure(font=(current_font_family, current_font_size))
 
 
 select_font_type.bind("<<ComboboxSelected>>", font_change)
@@ -242,6 +278,7 @@ def center_align(event=None):
 center_align_btn.configure(command=center_align)
 
 text_editor.configure(font=(current_font_family, current_font_size))
+# line_number.configure(font=(current_font_family, current_font_size))
 
 # file commands
 url = ''
@@ -256,7 +293,7 @@ def open_file(event=None):
     global url
     url = filedialog.askopenfile(initialdir=os.getcwd(), title='Open file',
                                  filetypes=(('All Files', '*.*'), ('TextFile', '*.txt'))).name
-    print(url)
+    # print(url)
     try:
         with open(url, 'r') as opened_file:
             text_editor.delete(1.0, tk.END)
@@ -334,6 +371,7 @@ def find_and_replace(event=None):
                 matches += 1
                 start_pos = end_pos
                 text_editor.tag_config('match', foreground='red', background='blue')
+
     def replace_text_func():
         word = find_text.get()
         replace_word = replace_text.get()
@@ -383,8 +421,8 @@ def hide_toolbar(event=None):
         text_editor.pack_forget()
         status_bar.pack_forget()
         tool_bar.pack(side=tk.TOP, fill=tk.X)
-        text_editor.pack(fill=tk.BOTH, expand=True)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        text_editor.pack(fill=tk.BOTH, expand=True)
         tool_bar_value = True
 
 
@@ -423,19 +461,20 @@ edit.add_command(label='Clear all', image=clear_all_img, compound=tk.LEFT, accel
 edit.add_command(label='Find', image=find_img, compound=tk.LEFT, accelerator='Ctrl+F', command=find_and_replace)
 
 # view commands
-view.add_checkbutton(label='Tool bar', offvalu=False, variable=tool_bar_value, image=tool_bar_img, compound=tk.LEFT, accelerator='Ctrl+T', command=hide_toolbar)
-view.add_checkbutton(label='Status bar', offvalue=False, variable=status_bar_value, image=status_bar_img, compound=tk.LEFT, accelerator='Ctrl+Alt+S', command=hide_statusbar)
-
+view.add_checkbutton(label='Tool bar', offvalu=False, variable=tool_bar_value, image=tool_bar_img, compound=tk.LEFT,
+                     accelerator='Ctrl+T', command=hide_toolbar)
+view.add_checkbutton(label='Status bar', offvalue=False, variable=status_bar_value, image=status_bar_img,
+                     compound=tk.LEFT, accelerator='Ctrl+Alt+S', command=hide_statusbar)
 
 # color themes configuration
 
 count = 0
 for i in color_themes:
-    color_theme.add_radiobutton(label=i, variable=active_color_theme, image=color_icons[count], compound=tk.LEFT, command=change_theme)
+    color_theme.add_radiobutton(label=i, variable=active_color_theme, image=color_icons[count], compound=tk.LEFT,
+                                command=change_theme)
     count += 1
 
 root.config(menu=main_menu)
-
 
 text_editor.bind('<Control-o>', open_file)
 text_editor.bind('<Control-n>', new_file)
@@ -443,6 +482,5 @@ text_editor.bind('<Control-Alt-s>', save_file_as)
 text_editor.bind('<Control-s>', save_file)
 text_editor.bind('<Control-q>', exit_function)
 text_editor.bind('<Control-f>', find_and_replace)
-
 
 root.mainloop()

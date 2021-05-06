@@ -1,6 +1,5 @@
 import tkinter as tk
 import math
-import numpy as np
 
 root = tk.Tk()
 root.configure(bg="#293C4A", bd=10)
@@ -27,8 +26,8 @@ def cot(x):
     return 1 / math.tan(x)
 
 
-def sqrt(n=2, x=None):
-    return x ** (1/float(n))
+def cube_root(x):
+    return x ** (1 / float(3))
 
 
 def sign_inv():
@@ -52,19 +51,41 @@ def set_input(**kwargs):
         text_input.set(res)
 
 
+def evaluate_fact():
+    global calc_exp
+    pos = calc_exp.find('fact')
+    operators = ['//', '+', '-', '^', '/', '*']
+    count = []
+    for i in range(len(calc_exp)):
+        if calc_exp[i] in operators:
+            count.append(i)
+    res_pos = 0
+    for k in count:
+        if k < pos:
+            res_pos = k
+        else:
+            break
+    if res_pos == 0:
+        calc_exp = str(calc_exp[:res_pos]) + str(str(math.factorial(eval(calc_exp[res_pos:pos]))))
+    else:
+        calc_exp = str(calc_exp[:res_pos+1]) + str(str(math.factorial(eval(calc_exp[res_pos+1:pos]))))
+
+
 def evaluate_exp():
     global calc_exp
     calc_exp = calc_exp.replace('^', '**')
     calc_exp = calc_exp.replace('\u03c0', 'pi')
     calc_exp = calc_exp.replace('\u2081\u2080', '')
+    calc_exp = calc_exp.replace('\u00B2\u221A', 'sqrt')
+    calc_exp = calc_exp.replace('\u00B3\u221A', 'cube_root')
+    # calc_exp = calc_exp.replace('\u207f\u221A(', '**(1/')
+    calc_exp = calc_exp.replace('!', 'fact')
+    if 'fact' in calc_exp:
+        evaluate_fact()
 
-    calc_exp = calc_exp.replace('\u00B2\u221A', 'sqrt(x=')
-    calc_exp = calc_exp.replace('\u00B3\u221A', 'sqrt(n=3, x=')
-
-    # calc_exp = calc_exp.replace('!', 'fact')
     sin, cos, tan = math.sin, math.cos, math.tan
     e, fact, pi = math.e, math.factorial, math.pi
-    log, ln = math.log10, math.log
+    log, ln, sqrt = math.log10, math.log, math.sqrt
     print(calc_exp)
     try:
         res = eval(str(calc_exp))
@@ -75,10 +96,12 @@ def evaluate_exp():
 
     return res
 
+
 def evaluate_percent():
     global calc_exp
     calc_exp = evaluate_exp() / 100
     set_input(set_value=calc_exp)
+
 
 def clear_input():
     global calc_exp
@@ -120,7 +143,7 @@ ten_powers = tk.Button(root, btn_props, text='10^x', command=lambda: btn_click('
 
 square_root = tk.Button(root, btn_props, text='\u00B2\u221A', command=lambda: btn_click('\u00B2\u221A(')).grid(row=4, column=0,sticky='nsew')
 third_root = tk.Button(root, btn_props, text='\u00B3\u221A', command=lambda: btn_click('\u00B3\u221A(')).grid(row=4, column=1, sticky='nsew')
-nth_root = tk.Button(root, btn_props, text='\u207f\u221A', command=lambda: btn_click('\u207f\u221A(')).grid(row=4, column=2, sticky='nsew')
+nth_root = tk.Button(root, btn_props, text='\u207f\u221A', command=lambda: btn_click('**(1/')).grid(row=4, column=2, sticky='nsew')
 log_ten = tk.Button(root, btn_props, text='log\u2081\u2080', command=lambda: btn_click('log\u2081\u2080(')).grid(row=4,  column=3,  sticky='nsew')
 log_e = tk.Button(root, btn_props, text='ln', command=lambda: btn_click('ln(')).grid(row=4, column=4, sticky='nsew')
 

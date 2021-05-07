@@ -2,7 +2,6 @@ import tkinter as tk
 import os
 from tkinter import ttk, font, colorchooser, filedialog, messagebox
 
-print(tk.TkVersion)
 root = tk.Tk()
 width = 1200
 height = 800

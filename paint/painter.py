@@ -3,6 +3,7 @@ from tkinter.colorchooser import askcolor
 from MyDialog import MyDialog
 from tkinter import filedialog
 from PIL import Image, ImageTk
+import threading
 import os
 import io
 
@@ -55,7 +56,7 @@ class Painter:
         self.file_menu.add_command(label="Eraser", accelerator='Ctrl+E', command=self.set_erase_mode)
         self.file_menu.add_command(label="Change Sheet size", accelerator='Ctrl+K', command=self.set_canvas_props_window)
         self.file_menu.add_command(label="Open file", accelerator='Ctrl+N', command=self.open_file)
-        self.file_menu.add_command(label="Save file", accelerator='Ctrl+S', command=self.save)
+        self.file_menu.add_command(label="Save file", accelerator='Ctrl+S', command=self.thread_func_for_save)
         self.menu_bar.add_cascade(label="Options", menu=self.file_menu)
 
     # setting up the canvas
@@ -100,13 +101,16 @@ class Painter:
     def reset(self, *args, **kwargs):
         self.old_x, self.old_y = None, None
 
+    def thread_func_for_save(self, url):
+        save1 = threading.Thread(target=self.save)
+        save1.start()
     # saving drawn canvas to image file
     def save(self, *args):
         global url
 
         try:
             if url:
-                ps = self.cvs.postscript(colormode='color')
+                ps = self.cvs.postscript('url'+'.ps', colormode='color')
                 img = Image.open(io.BytesIO(ps.encode('utf-8')))
                 img.save(url, 'jpeg')
             else:
@@ -137,7 +141,7 @@ class Painter:
     # binding key for shortcuts
     def binding(self):
         self.root.bind('<Control-e>', self.set_erase_mode)
-        self.root.bind('<Control-s>', self.save)
+        self.root.bind('<Control-s>', self.thread_func_for_save)
         self.root.bind('<Control-n>', self.open_file)
         self.root.bind('<Shift-D>', self.choose_color)
         self.root.bind('<Control-k>', self.set_canvas_props_window)

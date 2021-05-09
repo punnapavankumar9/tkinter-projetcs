@@ -12,16 +12,6 @@ class Painter:
     DEFAULT_PEN_SIZE = 2
     DEFAULT_COLOR = 'black'
 
-    def __init__(self):
-        self.root = tk.Tk()
-        self.root.geometry('500x500')
-        self.root.title('Paint by punna')
-        self.setup_options_frame()
-        self.setup_menubar()
-        self.setup_canvas()
-        self.root.config(menu=self.menu_bar)
-        self.binding()
-        self.root.mainloop()
 
     # configuresb the options frame below the menu
     def setup_options_frame(self):
@@ -146,6 +136,17 @@ class Painter:
         self.root.bind('<Shift-D>', self.choose_color)
         self.root.bind('<Control-k>', self.set_canvas_props_window)
         self.root.bind('<Control-d>', self.enable_draw)
+
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.geometry('500x500')
+        self.root.title('Paint by punna')
+        self.setup_options_frame()
+        self.setup_menubar()
+        self.setup_canvas()
+        self.root.config(menu=self.menu_bar)
+        self.binding()
+        self.root.mainloop()
 
 
 if __name__ == '__main__':
